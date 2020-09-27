@@ -4,9 +4,13 @@ import tty
 import select
 import sys
 import termios
-from inputs import get_gamepad
 import time
 import threading
+
+try:
+	from inputs import get_gamepad
+except ImportError:
+	print("please install inputs (pip install inputs)")
 
 
 class GetKeyboard:
@@ -60,10 +64,21 @@ class GetGamepad:
 				elif event.code == "BTN_EAST" : self.but_b = event.state
 				elif event.code == "BTN_NORTH" : self.but_y = event.state
 				elif event.code == "BTN_WEST" : self.but_x = event.state
+	
+	def gamepadUtility(self):
+		scalingFactor = 35000
+		deadzone = 5000
+		if self.x*self.x < deadzone * deadzone: self.x = 0
+		if self.y*self.y < deadzone * deadzone: self.y = 0
+		return (self.x/scalingFactor, self.y/scalingFactor,)
+
+
 	def runLoop(self):
 		while 1:
 			self.update()
 			time.sleep(.001)
+
+
 
 
 
@@ -94,10 +109,11 @@ class TeleOp:
 				self.vel_x = 0
 				self.ang_vel_y = 0
 
-				self.twist.linear.x = self.vel_x
-				self.twist.angular.z = self.ang_vel_y
-
+				
+			self.twist.linear.x = self.vel_x
+			self.twist.angular.z = self.ang_vel_y
 			self.twist_publisher.publish(self.twist)
+			#print(self.twist)
 
 
 
@@ -109,11 +125,12 @@ if __name__ == "__main__":
 	gamepad = GetGamepad()
 	neato = TeleOp()
 	
-	"""gamepadThread = threading.Thread(target = gamepad.runLoop)
+	gamepadThread = threading.Thread(target = gamepad.runLoop)
 	gamepadThread.start()
-"""
+
 	
 	while 1:
-		neato.update(1,0)
+		joystick = gamepad.gamepadUtility()
+		neato.update(-joystick[1],-joystick[0])
 		neato.update_hz.sleep()
 	
