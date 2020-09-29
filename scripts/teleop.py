@@ -129,7 +129,7 @@ if __name__ == "__main__":
 	gamepadThread.start()
 
 	
-	while not rospy.is_shutdown()::
+	while not rospy.is_shutdown():
 		joystick = gamepad.gamepadUtility()
 		neato.update(-joystick[1],-joystick[0])
 		neato.update_hz.sleep()
