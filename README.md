@@ -1,6 +1,4 @@
 # Comp Robo Warmup Project
-### Robert Barlow
-### 9/29/20
 
 ## Introduction
 
